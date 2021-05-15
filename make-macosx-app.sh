@@ -14,6 +14,7 @@ if [ $# == 0 ] || [ $# -gt 2 ]; then
 	echo " x86"
 	echo " x86_64"
 	echo " ppc"
+	echo " arm64"
 	echo
 	exit 1
 fi
@@ -41,12 +42,15 @@ if [ "$2" != "" ]; then
 		CURRENT_ARCH="x86_64"
 	elif [ "$2" == "ppc" ]; then
 		CURRENT_ARCH="ppc"
+	elif [ "$2" == "arm64" ]; then
+		CURRENT_ARCH="arm64"
 	else
 		echo "Invalid architecture: $2"
 		echo "Valid architectures are:"
 		echo " x86"
 		echo " x86_64"
 		echo " ppc"
+		echo " arm64"
 		echo
 		exit 1
 	fi
@@ -78,6 +82,7 @@ function symlinkArch()
     IS32=`file "${SRCFILE}.${EXT}" | grep "i386"`
     IS64=`file "${SRCFILE}.${EXT}" | grep "x86_64"`
     ISPPC=`file "${SRCFILE}.${EXT}" | grep "ppc"`
+    ISARM=`file "${SRCFILE}.${EXT}" | grep "arm64"`
 
     if [ "${IS32}" != "" ]; then
         if [ ! -L "${DSTFILE}x86.${EXT}" ]; then
@@ -103,6 +108,14 @@ function symlinkArch()
         rm "${DSTFILE}ppc.${EXT}"
     fi
 
+    if [ "${ISARM}" != "" ]; then
+        if [ ! -L "${DSTFILE}arm64.${EXT}" ]; then
+            ln -s "${SRCFILE}.${EXT}" "${DSTFILE}arm64.${EXT}"
+        fi
+    elif [ -L "${DSTFILE}arm64.${EXT}" ]; then
+        rm "${DSTFILE}arm64.${EXT}"
+    fi
+
     popd > /dev/null
 }
 
@@ -110,6 +123,7 @@ SEARCH_ARCHS="																	\
 	x86																			\
 	x86_64																		\
 	ppc																			\
+	arm64																		\
 "
 
 HAS_LIPO=`command -v lipo`
